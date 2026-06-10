@@ -1,0 +1,16 @@
+schema_version = "1.0.0"
+workspace = "jeryu-cache"
+profile = "rust-workspace"
+required_check = "jeryu-cache/required"
+
+[split]
+cross_repo_dependency_policy = "pinned-public-git-tags"
+local_path_patches = false
+
+cargo_members = [
+  "crates/jeryu-cache-core",
+  "crates/jeryu-cache-service",
+  "crates/jeryu-cache-cli",
+  "crates/jeryu-cache-adversary",
+  "crates/jeryu-cache",
+]

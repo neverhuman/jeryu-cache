@@ -1,0 +1,70 @@
+{
+  "tests": {
+    ".github/": {
+      "command": "just fast && just check",
+      "lane": "ci",
+      "purpose": "verify hosted workflows stay thin and local-reproducible"
+    },
+    "AGENTS.md": {
+      "command": "just score",
+      "lane": "score",
+      "purpose": "verify split metadata and agent maps"
+    },
+    "Cargo.toml": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify workspace manifest shape"
+    },
+    "config/jeryu-cache-policy.toml": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    },
+    "crates/jeryu-cache-adversary/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    },
+    "crates/jeryu-cache-cli/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    },
+    "crates/jeryu-cache-core/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    },
+    "crates/jeryu-cache-service/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    },
+    "crates/jeryu-cache/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    },
+    "examples/cache-key-material.json": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    },
+    "fixtures/cache-poisoning/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    },
+    "policies/cache-laws.toml": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    },
+    "tests/cache_poisoning_matrix.sh": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify jeryu-cache owned source remains build-addressable"
+    }
+  },
+  "workspace": "jeryu-cache"
+}

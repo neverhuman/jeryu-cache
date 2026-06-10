@@ -1,0 +1,25 @@
+{
+  "owners": {
+    ".github/": "ops",
+    "AGENTS.md": "split",
+    "Cargo.lock": "workspace",
+    "Cargo.toml": "workspace",
+    "Justfile": "workspace",
+    "README.md": "docs",
+    "agent/": "agent",
+    "config/jeryu-cache-policy.toml": "jeryu-cache",
+    "crates/jeryu-cache-adversary/**": "jeryu-cache",
+    "crates/jeryu-cache-cli/**": "jeryu-cache",
+    "crates/jeryu-cache-core/**": "jeryu-cache",
+    "crates/jeryu-cache-service/**": "jeryu-cache",
+    "crates/jeryu-cache/**": "jeryu-cache",
+    "docs/": "docs",
+    "examples/cache-key-material.json": "jeryu-cache",
+    "fixtures/cache-poisoning/**": "jeryu-cache",
+    "ops/": "ops",
+    "policies/cache-laws.toml": "jeryu-cache",
+    "scripts/": "ops",
+    "tests/cache_poisoning_matrix.sh": "jeryu-cache"
+  },
+  "workspace": "jeryu-cache"
+}
