@@ -268,11 +268,11 @@ checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
 name = "jeryu-cache"
-version = "4.0.0"
+version = "5.0.0"
 
 [[package]]
 name = "jeryu-cache-adversary"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "jeryu-cache-core",
  "jeryu-cache-service",
@@ -283,7 +283,7 @@ dependencies = [
 
 [[package]]
 name = "jeryu-cache-cli"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -296,7 +296,7 @@ dependencies = [
 
 [[package]]
 name = "jeryu-cache-core"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "blake3",
  "serde",
@@ -307,7 +307,7 @@ dependencies = [
 
 [[package]]
 name = "jeryu-cache-service"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "jeryu-cache-core",
  "serde",
