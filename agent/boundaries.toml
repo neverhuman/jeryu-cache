@@ -14,3 +14,11 @@ cargo_members = [
   "crates/jeryu-cache-adversary",
   "crates/jeryu-cache",
 ]
+
+[python]
+allowed_non_product_paths = ["ops/split/"]
+
+[db]
+root_paths = ["db"]
+migration_paths = ["db/migrations"]
+constraint_paths = ["db/constraints"]
