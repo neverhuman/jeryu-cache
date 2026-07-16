@@ -155,6 +155,11 @@
       "lane": "check",
       "purpose": "verify helper scripts parse and stay locally reproducible"
     },
+    "tools/": {
+      "command": "just security && just score",
+      "lane": "security",
+      "purpose": "verify the canonical supply-chain wrapper and its receipt stay fail-closed"
+    },
     "tests/": {
       "command": "just check && just score",
       "lane": "check",

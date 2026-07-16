@@ -32,6 +32,7 @@
     "repos.manifest.toml": "split",
     "rust-toolchain.toml": "workspace",
     "scripts/": "ops",
+    "tools/": "ops",
     "tests/": "tests",
     "tests/cache_poisoning_matrix.sh": "jeryu-cache",
     "agent/tool-adoption.toml": "agent",
