@@ -64,10 +64,10 @@ impl CacheKeyMaterial {
     pub fn canonical_json(&self) -> Result<Vec<u8>> {
         self.validate()?;
         let mut cloned = self.clone();
+        // A feature set is a set: order and repetition carry no meaning. RUSTFLAGS is a
+        // command line: order and repetition decide what rustc does, so it is keyed verbatim.
         cloned.feature_set.sort();
         cloned.feature_set.dedup();
-        cloned.rustflags.sort();
-        cloned.rustflags.dedup();
         serde_json::to_vec(&cloned).map_err(Into::into)
     }
 
@@ -143,6 +143,50 @@ mod tests {
         m.feature_set.reverse();
         let b = m.derive_key().unwrap();
         assert_eq!(a.digest, b.digest);
+    }
+
+    #[test]
+    fn cache_key_is_deterministic_under_duplicate_features() {
+        let a = material().derive_key().unwrap();
+        let mut m = material();
+        m.feature_set = vec!["default".into(), "serde".into(), "serde".into()];
+        let b = m.derive_key().unwrap();
+        assert_eq!(a.digest, b.digest);
+    }
+
+    #[test]
+    fn cache_key_changes_when_rustflags_are_reordered() {
+        let mut m = material();
+        m.rustflags = vec!["-Clink-arg=-Lfirst".into(), "-Clink-arg=-Lsecond".into()];
+        let a = m.derive_key().unwrap();
+        m.rustflags.reverse();
+        let b = m.derive_key().unwrap();
+        assert_ne!(
+            a.digest, b.digest,
+            "reordered rustflags must not share a cache key"
+        );
+    }
+
+    #[test]
+    fn cache_key_changes_when_rustflags_repeat() {
+        let mut m = material();
+        m.rustflags = vec!["--cfg=probe".into()];
+        let a = m.derive_key().unwrap();
+        m.rustflags = vec!["--cfg=probe".into(), "--cfg=probe".into()];
+        let b = m.derive_key().unwrap();
+        assert_ne!(
+            a.digest, b.digest,
+            "a repeated rustflag must not share a cache key with a single one"
+        );
+    }
+
+    #[test]
+    fn cache_key_verify_rejects_reordered_rustflags() {
+        let mut m = material();
+        m.rustflags = vec!["-Copt-level=1".into(), "-Cdebuginfo=0".into()];
+        let mut key = m.derive_key().unwrap();
+        key.material.rustflags.reverse();
+        assert!(key.verify().is_err());
     }
 
     #[test]
