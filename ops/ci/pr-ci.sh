@@ -47,6 +47,20 @@ consumer_repo="$(awk -F'\"' '/^workspace =/ {print $2; exit}' agent/audit-policy
 bash "$render_real" --check --repo "$consumer_repo" \
 --repo-root "$consumer_repo=$repo_root"
 
+# Ordinary compilation -- cargo check, the workspace test build and the poisoning matrix's cargo
+# test/run -- builds in the gate runner's retained per-slot cache when the gate host offers one
+# (JERYU_CI_BUILD_CACHE_DIR; jeryu-ci-runner ops/pr-gate/README.md, "Reusing ordinary compilation
+# without retaining proof"). This recipe measures nothing from a build directory: there is no
+# coverage or profile build, and every report it writes (.jankurai/, target/jankurai/,
+# target/security/, target/artifact-support/) names target/ literally, so it stays outside the
+# cache. The runner retains the cache only after a green gate and discards it when tools, recipe or
+# Cargo.lock change; cargo still checks every source file's freshness. Unset (a laptop, another
+# host), cargo builds into target/ as before.
+if [ -n "${JERYU_CI_BUILD_CACHE_DIR:-}" ]; then
+  export CARGO_TARGET_DIR="${JERYU_CI_BUILD_CACHE_DIR}"
+  echo "[pr-ci] ordinary compilation in ${CARGO_TARGET_DIR} (the gate runner's build cache)" >&2
+fi
+
 echo "[pr-ci] (jobs=$JOBS) standard lanes" >&2
 bash ops/ci/fast.sh
 JERYU_SPLIT_FULL_CHECK=1 bash ops/ci/check.sh
