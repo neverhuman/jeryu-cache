@@ -90,6 +90,9 @@ bash ops/ci/score.sh
 bash tools/security-lane.sh
 bash ops/ci/artifact_support.sh
 
+echo "[pr-ci] jankurai evidence lane (ratchet against the forge's protected main)" >&2
+bash ops/ci/proof_evidence.sh
+
 echo "[pr-ci] workspace test suite" >&2
 cargo nextest run --workspace --build-jobs "$JOBS" --test-threads "$JOBS"
 echo "[pr-ci] cache poisoning matrix" >&2
