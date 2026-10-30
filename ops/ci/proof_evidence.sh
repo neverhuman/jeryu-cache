@@ -44,10 +44,11 @@ fi
 head_commit="$(git rev-parse --verify 'HEAD^{commit}')"
 head_short="${head_commit:0:7}"
 
-baseline_parent="$(mktemp -d "${TMPDIR:-/tmp}/jeryu-cache-proof-baseline.XXXXXXXX")"
+mkdir -p "$repo_root/target"
+baseline_parent="$(mktemp -d "$repo_root/target/jeryu-cache-proof-baseline.XXXXXXXX")"
 cleanup_baseline() {
   case "$baseline_parent" in
-    "${TMPDIR:-/tmp}"/jeryu-cache-proof-baseline.*) rm -rf -- "$baseline_parent" ;;
+    "$repo_root/target"/jeryu-cache-proof-baseline.*) rm -rf -- "$baseline_parent" ;;
     *) printf 'refusing to remove unexpected baseline path: %s\n' "$baseline_parent" >&2 ;;
   esac
 }
@@ -63,6 +64,7 @@ base_commit="$(proof_baseline_clone "$origin_url" "$baseline_root")"
 proof_baseline_require_descendant "$base_commit" "$head_commit"
 proof_baseline_require_policy_identity agent/audit-policy.toml \
   "$baseline_root/agent/audit-policy.toml"
+audit_base_commit="$(proof_baseline_audit_commit "$baseline_root" "$repo_root/agent/audit-policy.toml" "$base_commit")"
 printf '[proof] baseline: protected main %s from %s\n' "$base_commit" "$origin_url" >&2
 
 rm -rf "target/jankurai/proofbind" "target/jankurai/proofmark" "target/jankurai/rust" "target/jankurai/security" \
@@ -89,7 +91,7 @@ expected_changed="$(
 jankurai audit "$baseline_root" --mode advisory --full --no-score-history --read-only \
   --policy agent/audit-policy.toml \
   --json "target/jankurai/accepted-baseline.json" --md "target/jankurai/accepted-baseline.md"
-jq -e --arg base "$base_commit" '
+jq -e --arg base "$audit_base_commit" '
   .schema_version == "1.9.0" and .git.head == $base and .git.dirty_worktree == false and
   (.score | type == "number") and (.decision.minimum_score | type == "number") and
   (.caps_applied | type == "array")

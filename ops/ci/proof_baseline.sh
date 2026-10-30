@@ -102,8 +102,37 @@ proof_baseline_require_policy_identity() {
     fi
   done
   if [[ "$(sha256sum <"$candidate")" != "$(sha256sum <"$protected")" ]]; then
+    # A generated tool-version transition changes no scoring or scan rule.
+    # Limit this exception to the current governed patch, byte for byte.
+    if [[ "$(grep -c '^required_tool_version = "1.7.6"$' "$candidate")" == 1 &&
+          "$(grep -c '^required_tool_version = "1.7.5"$' "$protected")" == 1 &&
+          "${JERYU_JANKURAI_SEMVER:-}" == 1.7.6 ]] &&
+       cmp -s <(sed '/^required_tool_version = /d' "$candidate") \
+              <(sed '/^required_tool_version = /d' "$protected"); then
+      return 0
+    fi
     printf '%s differs from protected main: the ratchet refuses a head that edits the policy judging it\n' \
       "$candidate" >&2
     return 1
   fi
+}
+
+# Audit protected main with the allowed rendered version in a clean one-file
+# child commit. The original base remains the ancestor used for changed paths.
+proof_baseline_audit_commit() {
+  local root="$1" policy="$2" base="$3" variant
+  if cmp -s "$policy" "$root/agent/audit-policy.toml"; then
+    printf '%s\n' "$base"
+    return 0
+  fi
+  proof_baseline_require_policy_identity "$policy" "$root/agent/audit-policy.toml" || return 1
+  cp -- "$policy" "$root/agent/audit-policy.toml" || return 1
+  git -C "$root" -c user.name=proof-evidence -c user.email=proof-evidence@invalid \
+    -c commit.gpgsign=false commit --quiet -m 'proof baseline: governed version only' \
+    -- agent/audit-policy.toml || return 1
+  variant="$(git -C "$root" rev-parse HEAD)" || return 1
+  [[ "$(git -C "$root" rev-parse HEAD^)" == "$base" &&
+     "$(git -C "$root" diff --name-only "$base" "$variant")" == agent/audit-policy.toml &&
+     -z "$(git -C "$root" status --porcelain=v1 --untracked-files=all)" ]] || return 1
+  printf '%s\n' "$variant"
 }

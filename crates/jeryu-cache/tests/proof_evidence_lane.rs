@@ -60,9 +60,7 @@ fn run_guard(stub_bin: Option<&Path>, snippet: &str) -> Output {
     };
     Command::new("bash")
         .arg("-c")
-        .arg(format!(
-            "source ops/ci/proof_baseline.sh\n{snippet}"
-        ))
+        .arg(format!("source ops/ci/proof_baseline.sh\n{snippet}"))
         .current_dir(&root)
         .env("PATH", path)
         .output()
@@ -86,7 +84,10 @@ fi
 exit 1"#,
     );
 
-    let out = run_guard(Some(&remote), "STUB_ORIGIN=https://forge.example/jeryu/jeryu-cache.git proof_baseline_remote_url");
+    let out = run_guard(
+        Some(&remote),
+        "STUB_ORIGIN=https://forge.example/jeryu/jeryu-cache.git proof_baseline_remote_url",
+    );
     assert!(out.status.success(), "a remote URL is the baseline source");
     assert_eq!(
         String::from_utf8_lossy(&out.stdout).trim(),
@@ -237,7 +238,10 @@ exit 1"#,
             dir.join("b").display().to_string()
         ),
     );
-    assert!(!dirty.status.success(), "a dirty clone is not protected main");
+    assert!(
+        !dirty.status.success(),
+        "a dirty clone is not protected main"
+    );
 
     let short = run_guard(
         Some(&stub),
@@ -246,7 +250,10 @@ exit 1"#,
             dir.join("c").display().to_string()
         ),
     );
-    assert!(!short.status.success(), "an abbreviated head is not a commit id");
+    assert!(
+        !short.status.success(),
+        "an abbreviated head is not a commit id"
+    );
 }
 
 #[test]
@@ -279,6 +286,55 @@ fn the_head_may_not_edit_the_policy_that_judges_it() {
         !drifted.status.success(),
         "a head that lowers the floor must not be judged by its own policy"
     );
+
+    fs::write(
+        &protected,
+        "minimum_score = 85\nrequired_tool_version = \"1.7.5\"\n",
+    )
+    .expect("protected version");
+    for (policy, governed, accepted) in [
+        (
+            "minimum_score = 85\nrequired_tool_version = \"1.7.6\"\n",
+            "1.7.6",
+            true,
+        ),
+        (
+            "minimum_score = 84\nrequired_tool_version = \"1.7.6\"\n",
+            "1.7.6",
+            false,
+        ),
+        (
+            "minimum_score = 85\nrequired_tool_version = \"1.7.6\"\n",
+            "1.7.5",
+            false,
+        ),
+        (
+            "minimum_score = 85\nrequired_tool_version = \"1.7.7\"\n",
+            "1.7.6",
+            false,
+        ),
+        (
+            "minimum_score = 85\nrequired_tool_version = \"1.7.6\"\nrequired_tool_version = \"1.7.6\"\n",
+            "1.7.6",
+            false,
+        ),
+    ] {
+        fs::write(&candidate, policy).expect("candidate version");
+        let result = run_guard(
+            None,
+            &format!(
+                "JERYU_JANKURAI_SEMVER={governed} proof_baseline_require_policy_identity {:?} {:?}",
+                candidate.display().to_string(),
+                protected.display().to_string()
+            ),
+        );
+        assert_eq!(
+            result.status.success(),
+            accepted,
+            "{policy}: {}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+    }
 
     let missing = run_guard(
         None,
@@ -323,8 +379,7 @@ fn the_lane_keeps_no_baseline_and_no_result_it_did_not_produce() {
         );
     }
     assert!(
-        lane.contains("migration-report.json")
-            && lane.contains("liability_score <= $baseline"),
+        lane.contains("migration-report.json") && lane.contains("liability_score <= $baseline"),
         "the migration analysis result is gated, not merely written"
     );
     // The only commands the lane names without running are the two whose runner
