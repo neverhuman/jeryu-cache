@@ -107,8 +107,7 @@ proof_baseline_require_policy_identity() {
     if [[ "$(grep -c '^required_tool_version = "1.7.6"$' "$candidate")" == 1 &&
           "$(grep -c '^required_tool_version = "1.7.5"$' "$protected")" == 1 &&
           "${JERYU_JANKURAI_SEMVER:-}" == 1.7.6 ]] &&
-       cmp -s <(sed '/^required_tool_version = /d' "$candidate") \
-              <(sed '/^required_tool_version = /d' "$protected"); then
+       cmp -s <(sed 's/^required_tool_version = "1\.7\.6"$/required_tool_version = "1.7.5"/' "$candidate") "$protected"; then
       return 0
     fi
     printf '%s differs from protected main: the ratchet refuses a head that edits the policy judging it\n' \
